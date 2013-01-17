@@ -16,9 +16,7 @@ function getHome(response) {
   console.log("Request handler 'start' was called.");
 
   // Create list of documents in the folder.
-  fs.readdir("serverData/", readDirCallBack);
-
-  function readDirCallBack(err, listFiles){
+  fs.readdir("serverData/", function(err, listFiles) { // callback fct.
     // TODO: handle err
     // TODO: update to use a templating lib (see ExpressJS)
     var folderName = 'serverData/';
@@ -73,7 +71,7 @@ function getHome(response) {
     response.writeHead(200, {"Content-Type": "text/html"});
     response.write(html);
     response.end();
-  };
+  });
 };
 
 
@@ -89,15 +87,11 @@ function uploadAndGetDocPage(response, request) {
   // Generate file upload form, using formidable lib.
   var form = new formidable.IncomingForm();
   console.log("about to parse");
-  form.parse(request, parseCallBack);
-
-  function parseCallBack(error, fields, files) {
+  form.parse(request, function(error, fields, files) { // callback fct.
     console.log("parsing done");
     var fname = files.upload.name;
     //TODO: fix possible error on Windows systems: tried to rename to an already existing file
-    fs.rename(files.upload.path, "serverData/"+fname, renameCallBack);
-
-    function renameCallBack(err){
+    fs.rename(files.upload.path, "serverData/"+fname, function(err) { // callback fct.
       if (err) {
         fs.unlink("serverData/"+fname);
         fs.rename(files.upload.path, "serverData/"+fname);
@@ -107,8 +101,8 @@ function uploadAndGetDocPage(response, request) {
       response.writeHead(200, {"Content-Type": "text/html"});
       response.write(getDocTextSync(fname)['body']);
       response.end();
-    };
-  };
+    });
+  });
 };
 
 
@@ -121,16 +115,14 @@ function getDocPage(response, request) {
   // Get the filename from the URL fileIndex argument
   var url_parts = url.parse(request.url,true);
   var fileIndex = url_parts.query.fileIndex;
-  fs.readdir("serverData/", readDirCallBack);
-  
-  function readDirCallBack(err, listFiles){
+  fs.readdir("serverData/", function(err, listFiles) { // callback fct.
     var fname = listFiles[fileIndex];
     
     // Send html to browser, with content taken from getDocTextSync
     response.writeHead(200, {"Content-Type": "text/html"});
     response.write(getDocTextSync(fname)['body']);
     response.end();
-  };
+  });
   
 };
 
